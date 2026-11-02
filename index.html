@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Звёздный Экспресс: Состав Числа</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700;800&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --space-dark: #0a0e1a;
+      --gold: #fbb034;
+      --gold-dark: #c67900;
+      --gold-light: #ffdd80;
+      --accent-blue: #2a8bf2;
+      --accent-shadow: #175bb0;
+      --card-cream: #fffdf8;
+      --border-parchment: #e2cca6;
+      --error-color: #ff4757;
+      --success-color: #2ed573;
+      --text-dark: #1e293b;
+      --text-muted: #64748b;
+      --wood: #c05621;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Nunito', 'Fredoka', system-ui, -apple-system, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 15%, #18223e 0%, var(--space-dark) 90%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      overflow-x: hidden;
+    }
+
+    .game-wrapper {
+      width: 100%;
+      max-width: 860px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Хедер с лисёнком-машинистом */
+    .header-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(23, 33, 56, 0.85);
+      backdrop-filter: blur(12px);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-md);
+      padding: 8px 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    .conductor-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .conductor-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #fed7aa url('conductor.png') center/cover no-repeat;
+      border: 3px solid var(--gold);
+      box-shadow: 0 0 12px rgba(251, 176, 52, 0.5);
+      flex-shrink: 0;
+      transition: transform 0.3s;
+    }
+
+    .conductor-avatar.happy {
+      animation: happyJump 0.6s ease infinite alternate;
+    }
+
+    .conductor-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .conductor-name {
+      font-family: 'Fredoka', cursive;
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--gold);
+      text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+    }
+
+    .conductor-sub {
+      font-size: 13px;
+      font-weight: 800;
+      color: #94a3b8;
+    }
+
+    .btn-sound-toggle {
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      border-radius: 20px;
+      color: #fff;
+      padding: 6px 14px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-sound-toggle.active {
+      background: var(--gold);
+      color: #3b2003;
+      border-color: var(--gold-light);
+      box-shadow: 0 2px 10px rgba(251, 176, 52, 0.4);
+    }
+
+    /* Док станций */
+    .station-dock {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(8px);
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      flex-wrap: wrap;
+    }
+
+    .station-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .station-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .btn-station {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #1e293b;
+      border: 2px solid #334155;
+      color: #94a3b8;
+      font-size: 20px;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 0 #0f172a;
+      transition: all 0.15s ease;
+    }
+
+    .btn-station.active {
+      background: linear-gradient(180deg, #ffc837 0%, var(--gold) 100%);
+      color: #422006;
+      border-color: var(--gold-light);
+      box-shadow: 0 5px 0 var(--gold-dark), 0 0 16px rgba(251, 176, 52, 0.6);
+      transform: translateY(-2px);
+    }
+
+    /* АРЕНА С КОСМИЧЕСКИМ ФОНОМ */
+    .space-stage {
+      background: #0d1424 url('space_bg.jpg') center/cover no-repeat;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius-lg);
+      padding: 24px 12px 16px;
+      box-shadow: 0 16px 36px rgba(0,0,0,0.5), inset 0 0 30px rgba(0,0,0,0.4);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 230px;
+      justify-content: center;
+    }
+
+    .train-composition {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      width: 100%;
+      gap: 0;
+      transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      z-index: 2;
+    }
+
+    .train-composition.depart {
+      transform: translateX(140%) scale(0.9);
+      opacity: 0.15;
+    }
+
+    .coupler {
+      width: 22px;
+      height: 12px;
+      background: linear-gradient(180deg, #94a3b8 0%, #475569 100%);
+      border-radius: 4px;
+      margin-bottom: 28px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      display: none;
+      flex-shrink: 0;
+    }
+
+    .coupler.show { display: block; }
+
+    /* Вагон */
+    .main-car {
+      background: rgba(255, 255, 255, 0.94);
+      border: 4px solid var(--accent-blue);
+      border-radius: 24px 24px 12px 12px;
+      padding: 12px;
+      flex: 1 1 300px;
+      max-width: 440px;
+      min-width: 240px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+      position: relative;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .main-car.sealed {
+      border-color: var(--success-color);
+      box-shadow: 0 0 30px rgba(46, 213, 115, 0.6);
+    }
+
+    .main-car.error-shake {
+      animation: shake 0.45s ease;
+      border-color: var(--error-color);
+      box-shadow: 0 0 30px rgba(255, 71, 87, 0.6);
+    }
+
+    .car-roof {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px dashed #cbd5e1;
+      padding-bottom: 6px;
+    }
+
+    .car-target-badge {
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--accent-blue);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .ten-badge {
+      background: linear-gradient(180deg, #ffe066 0%, #fab005 100%);
+      color: #5c3b00;
+      font-size: 12px;
+      font-weight: 900;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid #ffd43b;
+      box-shadow: 0 2px 8px rgba(250, 176, 5, 0.6);
+      display: none;
+    }
+
+    .ten-badge.visible {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      animation: bounce 0.6s infinite alternate;
+    }
+
+    /* Сетка сидений */
+    .seat-grid {
+      display: grid;
+      gap: 8px;
+      width: 100%;
+      background: #e2e8f0;
+      padding: 8px;
+      border-radius: 16px;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .seat {
+      aspect-ratio: 1;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      background: rgba(255, 255, 255, 0.8);
+      border: 2px dashed #94a3b8;
+      overflow: hidden;
+    }
+
+    /* CSS СПРАЙТ ДЛЯ 10 ПЕРСОНАЖЕЙ (5 колонок x 2 ряда) */
+    .avatar-hero {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background-image: url('passengers.png');
+      background-size: 500% 200%;
+      background-repeat: no-repeat;
+      display: block;
+    }
+
+    /* Координаты 10 персонажей из листа */
+    .hero-0 { background-position: 0% 0%; }     /* Зайка */
+    .hero-1 { background-position: 25% 0%; }    /* Маша */
+    .hero-2 { background-position: 50% 0%; }    /* Медведь */
+    .hero-3 { background-position: 75% 0%; }    /* Чебурашка */
+    .hero-4 { background-position: 100% 0%; }   /* Винни-Пух */
+    .hero-5 { background-position: 0% 100%; }   /* Леди Баг */
+    .hero-6 { background-position: 25% 100%; }  /* Эльза */
+    .hero-7 { background-position: 50% 100%; }  /* Стив */
+    .hero-8 { background-position: 75% 100%; }  /* Нолик */
+    .hero-9 { background-position: 100% 100%; } /* Лунтик */
+
+    .seat.initial {
+      border: 2px solid #38bdf8;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+    }
+
+    .seat.added-correct {
+      border: 2px solid var(--success-color);
+      animation: popIn 0.35s ease;
+      box-shadow: 0 0 14px rgba(46, 213, 115, 0.6);
+    }
+
+    .seat.added-wrong {
+      border: 2px solid var(--error-color);
+      animation: popIn 0.35s ease;
+    }
+
+    .seat.empty {
+      color: #94a3b8;
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .seat.empty.pulse {
+      border-color: var(--error-color);
+      background: #ffe4e6;
+      color: var(--error-color);
+      animation: pulseAlert 0.7s infinite alternate;
+    }
+
+    /* Прицеп (только станция 10) */
+    .trailer-car {
+      background: rgba(255, 251, 235, 0.95);
+      border: 3px dashed var(--wood);
+      border-radius: 16px;
+      padding: 8px;
+      flex: 0 0 150px;
+      max-width: 170px;
+      min-height: 115px;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.3);
+      position: relative;
+    }
+
+    .trailer-car.show { display: flex; }
+
+    .trailer-car.active-over {
+      border-color: var(--error-color);
+      background: #fff1f2;
+      box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
+      animation: shake 0.45s ease;
+    }
+
+    .trailer-title {
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--wood);
+      text-transform: uppercase;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+
+    .over-badge {
+      background: var(--error-color);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 12px;
+      display: none;
+      animation: pulseAlert 0.6s infinite alternate;
+      text-align: center;
+    }
+
+    .trailer-car.active-over .over-badge { display: block; }
+
+    .trailer-seats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-height: 48px;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      background: rgba(0,0,0,0.05);
+      border-radius: 10px;
+    }
+
+    .trailer-item {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid #fdba74;
+      animation: popIn 0.3s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      overflow: hidden;
+    }
+
+    /* Светящийся звездный путь */
+    .starlight-rails {
+      width: 100%;
+      height: 12px;
+      margin-top: 14px;
+      background: repeating-linear-gradient(90deg, #38bdf8 0px, #38bdf8 12px, transparent 12px, transparent 26px);
+      border-bottom: 3px solid #38bdf8;
+      box-shadow: 0 0 14px #38bdf8;
+      border-radius: 4px;
+    }
+
+    /* Пергаментный экран */
+    .parchment-board {
+      background: var(--card-cream);
+      border: 3px solid var(--border-parchment);
+      border-radius: var(--radius-lg);
+      padding: 12px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .parchment-board::after {
+      content: "★";
+      position: absolute;
+      top: 6px; right: 12px;
+      color: var(--gold);
+      font-size: 16px;
+      opacity: 0.7;
+    }
+    .parchment-board::before {
+      content: "★";
+      position: absolute;
+      top: 6px; left: 12px;
+      color: var(--gold);
+      font-size: 16px;
+      opacity: 0.7;
+    }
+
+    .parchment-board.success {
+      background: #f0fdf4;
+      border-color: #86efac;
+      box-shadow: 0 0 25px rgba(46, 213, 115, 0.4);
+    }
+
+    .parchment-board.error {
+      background: #fef2f2;
+      border-color: #fca5a5;
+      box-shadow: 0 0 25px rgba(255, 71, 87, 0.4);
+    }
+
+    .big-formula {
+      font-family: 'Fredoka', cursive;
+      font-size: clamp(28px, 6vw, 42px);
+      font-weight: 800;
+      color: var(--text-dark);
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .not-equal-sign {
+      color: var(--error-color);
+      font-size: 1.2em;
+    }
+
+    .hint-caption {
+      font-size: clamp(15px, 3.8vw, 19px);
+      font-weight: 800;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .parchment-board.success .hint-caption { color: #166534; }
+    .parchment-board.error .hint-caption { color: #991b1b; }
+
+    /* Перрон: тактильные объемные кнопки */
+    .deck-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .deck-header {
+      font-size: 14px;
+      font-weight: 800;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-align: center;
+    }
+
+    .candidate-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .btn-candy {
+      background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+      border: 3px solid #cbd5e1;
+      border-radius: 18px;
+      padding: 10px 4px;
+      font-family: 'Fredoka', cursive;
+      font-size: clamp(24px, 5.5vw, 32px);
+      font-weight: 900;
+      color: #1e293b;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 7px 0 #94a3b8, 0 10px 16px rgba(0,0,0,0.3);
+      transition: all 0.12s ease;
+      position: relative;
+    }
+
+    .btn-candy:hover:not(:disabled) {
+      transform: translateY(-2px);
+      border-color: var(--accent-blue);
+      box-shadow: 0 9px 0 var(--accent-shadow), 0 12px 20px rgba(42, 139, 242, 0.3);
+      color: var(--accent-blue);
+    }
+
+    .btn-candy:active:not(:disabled) {
+      transform: translateY(5px);
+      box-shadow: 0 2px 0 var(--accent-shadow);
+    }
+
+    .btn-candy:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .candy-mini-hero {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-image: url('passengers.png');
+      background-size: 500% 200%;
+      border: 1px solid #cbd5e1;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.2); opacity: 0; }
+      70% { transform: scale(1.15); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes pulseAlert {
+      0% { opacity: 0.6; transform: scale(0.97); }
+      100% { opacity: 1; transform: scale(1.03); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    @keyframes bounce {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-4px); }
+    }
+
+    @keyframes happyJump {
+      0% { transform: scale(1) translateY(0); }
+      100% { transform: scale(1.1) translateY(-6px); }
+    }
+
+    @media (max-width: 600px) {
+      .space-stage { min-height: 200px; padding: 14px 6px 10px; }
+      .coupler { width: 10px; }
+      .trailer-car { flex: 0 0 110px; min-height: 90px; padding: 4px; }
+      .trailer-item { width: 34px; height: 34px; }
+      .candidate-grid { gap: 6px; }
+      .btn-candy { padding: 8px 2px; border-radius: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="game-wrapper">
+  <!-- Шапка с проводником Лисичкой -->
+  <header class="header-panel">
+    <div class="conductor-profile">
+      <div class="conductor-avatar" id="conductor-avatar"></div>
+      <div class="conductor-info">
+        <span class="conductor-name">Машинист Лисёнок</span>
+        <span class="conductor-sub">Звёздный Экспресс</span>
+      </div>
+    </div>
+    <button class="btn-sound-toggle active" id="sound-btn" onclick="toggleFxSound()">
+      🔊 Звуки
+    </button>
+  </header>
+
+  <!-- Станции -->
+  <nav class="station-dock">
+    <span class="station-title">Станция:</span>
+    <div class="station-pills">
+      <button class="btn-station" onclick="setStation(5)">5</button>
+      <button class="btn-station" onclick="setStation(6)">6</button>
+      <button class="btn-station" onclick="setStation(7)">7</button>
+      <button class="btn-station" onclick="setStation(8)">8</button>
+      <button class="btn-station" onclick="setStation(9)">9</button>
+      <button class="btn-station active" onclick="setStation(10)">10</button>
+    </div>
+  </nav>
+
+  <!-- Арена со звёздным небом и созвездиями -->
+  <main class="space-stage">
+    <div class="train-composition" id="train-comp">
+      <!-- Основной вагон-капсула -->
+      <div class="main-car" id="main-car">
+        <div class="car-roof">
+          <span class="car-target-badge" id="car-title">Вагон: 10 мест</span>
+          <span class="ten-badge" id="ten-badge">⭐ 1 ДЕСЯТОК</span>
+        </div>
+        <div class="seat-grid" id="seat-grid"></div>
+      </div>
+
+      <!-- Металлическая сцепка -->
+      <div class="coupler" id="train-coupler"></div>
+
+      <!-- Прицеп-платформа (только станция 10) -->
+      <div class="trailer-car" id="trailer-car">
+        <div class="trailer-header">
+          <div class="trailer-title" id="trailer-title">Прицеп: 0</div>
+          <div class="over-badge" id="over-badge">Лишние! 📦</div>
+        </div>
+        <div class="trailer-seats" id="trailer-seats"></div>
+      </div>
+    </div>
+
+    <!-- Звёздные рельсы -->
+    <div class="starlight-rails"></div>
+  </main>
+
+  <!-- Пергаментная доска подсказок -->
+  <section class="parchment-board" id="board-card">
+    <div class="big-formula" id="formula-text">2 + ❓ = 10</div>
+    <div class="hint-caption" id="hint-text">Сколько зверят добавить?</div>
+  </section>
+
+  <!-- Перрон -->
+  <footer class="deck-panel">
+    <div class="deck-header">Выбери группу зверят:</div>
+    <div class="candidate-grid" id="candidate-grid"></div>
+  </footer>
+</div>
+
+<script>
+  function getEmptySeatsText(n) {
+    if (n === 1) return "1 свободное место";
+    if (n >= 2 && n <= 4) return `${n} свободных места`;
+    return `${n} свободных мест`;
+  }
+
+  function getTrailerOverText(n) {
+    if (n === 1) return "1 лишний зверёк";
+    if (n >= 2 && n <= 4) return `${n} лишних зверька`;
+    return `${n} лишних зверят`;
+  }
+
+  function getOverFullMessage(n) {
+    if (n === 1) return "1 лишний зверёк не поместился 🛑";
+    if (n >= 2 && n <= 4) return `${n} лишних зверька не поместились 🛑`;
+    return `${n} лишних зверят не поместилось 🛑`;
+  }
+
+  let state = {
+    soundFx: true,
+    target: 10,
+    initialCount: 2,
+    correctAnswer: 8,
+    isLocked: false,
+    candidates: []
+  };
+
+  // ЗВУКОВОЙ ДВИЖОК WEB AUDIO API (без зависаний)
+  let audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+
+  window.addEventListener('pointerdown', () => {
+    try { getAudioCtx(); } catch(e) {}
+  }, { once: true });
+
+  function playFx(type) {
+    if (!state.soundFx) return;
+    try {
+      const ctx = getAudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      const now = ctx.currentTime;
+
+      if (type === "pop") {
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(420, now);
+        osc.frequency.exponentialRampToValueAtTime(840, now + 0.08);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      } else if (type === "lock") {
+        osc.type = "square";
+        osc.frequency.setValueAtTime(750, now);
+        osc.frequency.setValueAtTime(1150, now + 0.05);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+        osc.start(now);
+        osc.stop(now + 0.14);
+      } else if (type === "win") {
+        const chord = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+        chord.forEach((freq, idx) => {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.type = "triangle";
+          o.frequency.setValueAtTime(freq, now + idx * 0.07);
+          g.gain.setValueAtTime(0.18, now + idx * 0.07);
+          g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.4);
+          o.start(now + idx * 0.07);
+          o.stop(now + idx * 0.07 + 0.4);
+        });
+      } else if (type === "oops") {
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(280, now);
+        osc.frequency.exponentialRampToValueAtTime(190, now + 0.22);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+        osc.start(now);
+        osc.stop(now + 0.22);
+      }
+    } catch(e) {
+      console.warn(e);
+    }
+  }
+
+  function toggleFxSound() {
+    state.soundFx = !state.soundFx;
+    const btn = document.getElementById("sound-btn");
+    btn.textContent = state.soundFx ? "🔊 Звуки" : "🔇 Тихо";
+    btn.classList.toggle("active", state.soundFx);
+  }
+
+  function setStation(num) {
+    if (state.isLocked) return;
+    state.target = num;
+    document.querySelectorAll(".btn-station").forEach(b => {
+      b.classList.toggle("active", parseInt(b.textContent) === num);
+    });
+    playFx("pop");
+    startRound();
+  }
+
+  function startRound() {
+    state.isLocked = false;
+    state.initialCount = Math.floor(Math.random() * (state.target - 2)) + 1;
+    state.correctAnswer = state.target - state.initialCount;
+
+    let options = new Set();
+    options.add(state.correctAnswer);
+
+    if (state.correctAnswer > 1) {
+      options.add(state.correctAnswer - 1);
+    }
+    options.add(state.correctAnswer + 1);
+
+    let tries = 0;
+    while (options.size < 4 && tries < 20) {
+      tries++;
+      let cand = Math.floor(Math.random() * state.target) + 1;
+      options.add(cand);
+    }
+    for (let c = 1; options.size < 4 && c <= state.target + 2; c++) {
+      options.add(c);
+    }
+
+    state.candidates = Array.from(options).sort(() => Math.random() - 0.5);
+
+    document.getElementById("train-comp").classList.remove("depart");
+    document.getElementById("main-car").classList.remove("sealed", "error-shake");
+    document.getElementById("trailer-car").classList.remove("active-over");
+    document.getElementById("ten-badge").classList.remove("visible");
+    document.getElementById("conductor-avatar").classList.remove("happy");
+
+    renderUI();
+  }
+
+  function handlePick(ans) {
+    if (state.isLocked) return;
+    state.isLocked = true;
+
+    const total = state.initialCount + ans;
+    const board = document.getElementById("board-card");
+    const formulaText = document.getElementById("formula-text");
+    const hintText = document.getElementById("hint-text");
+    const mainCar = document.getElementById("main-car");
+    const trailerCar = document.getElementById("trailer-car");
+    const tenBadge = document.getElementById("ten-badge");
+    const conductor = document.getElementById("conductor-avatar");
+
+    renderBoardPositions(ans);
+
+    if (ans === state.correctAnswer) {
+      // 1. ТОЧНОЕ ЗАПОЛНЕНИЕ
+      playFx("lock");
+      setTimeout(() => playFx("win"), 180);
+
+      mainCar.classList.add("sealed");
+      trailerCar.classList.remove("active-over");
+      conductor.classList.add("happy");
+
+      if (state.target === 10) {
+        tenBadge.classList.add("visible");
+      }
+
+      board.className = "parchment-board success";
+      formulaText.innerHTML = `${state.initialCount} + ${ans} = ${state.target} ✨`;
+      hintText.textContent = (state.target === 10)
+        ? "Ура! Собрался ровно 1 десяток! Чик-чик, поехали!"
+        : `Отлично! Вагон на ${state.target} мест заполнен!`;
+
+      setTimeout(() => {
+        document.getElementById("train-comp").classList.add("depart");
+      }, 1500);
+
+      setTimeout(startRound, 2300);
+
+    } else if (ans < state.correctAnswer) {
+      // 2. НЕ ДОБРАЛ
+      playFx("oops");
+      mainCar.classList.add("error-shake");
+      trailerCar.classList.remove("active-over");
+      tenBadge.classList.remove("visible");
+
+      const left = state.target - total;
+      board.className = "parchment-board error";
+      formulaText.innerHTML = `${state.initialCount} + ${ans} <span class="not-equal-sign">≠</span> ${state.target}`;
+      hintText.textContent = `Получилось ${total}. Свободно: ещё ${getEmptySeatsText(left)} ❓`;
+
+      setTimeout(resetMistake, 2600);
+
+    } else {
+      // 3. ПЕРЕБОР
+      const over = total - state.target;
+      mainCar.classList.add("error-shake");
+      board.className = "parchment-board error";
+      formulaText.innerHTML = `${state.initialCount} + ${ans} <span class="not-equal-sign">≠</span> ${state.target}`;
+
+      if (state.target === 10) {
+        playFx("lock");
+        setTimeout(() => playFx("oops"), 180);
+
+        mainCar.classList.add("sealed");
+        trailerCar.classList.add("active-over");
+        tenBadge.classList.add("visible");
+
+        hintText.textContent = `Получилось ${total}. В прицепе: ${getTrailerOverText(over)} 📦`;
+      } else {
+        playFx("oops");
+        mainCar.classList.remove("sealed");
+        trailerCar.classList.remove("active-over");
+        tenBadge.classList.remove("visible");
+
+        hintText.textContent = `В вагоне только ${state.target} мест! ${getOverFullMessage(over)}`;
+      }
+
+      setTimeout(resetMistake, 3000);
+    }
+  }
+
+  function resetMistake() {
+    state.isLocked = false;
+    document.getElementById("main-car").classList.remove("sealed", "error-shake");
+    document.getElementById("trailer-car").classList.remove("active-over");
+    document.getElementById("ten-badge").classList.remove("visible");
+    renderUI();
+  }
+
+  function applyGridLayout(grid, target) {
+    if (target === 5) {
+      grid.style.gridTemplateColumns = "repeat(5, 1fr)";
+    } else if (target <= 8) {
+      grid.style.gridTemplateColumns = `repeat(${Math.ceil(target / 2)}, 1fr)`;
+    } else {
+      grid.style.gridTemplateColumns = "repeat(5, 1fr)";
+    }
+  }
+
+  function renderBoardPositions(ans) {
+    const seatGrid = document.getElementById("seat-grid");
+    seatGrid.innerHTML = "";
+    applyGridLayout(seatGrid, state.target);
+
+    const total = state.initialCount + ans;
+    const inCar = Math.min(total, state.target);
+    const inTrailer = (state.target === 10) ? Math.max(0, total - 10) : 0;
+
+    for (let i = 0; i < state.target; i++) {
+      const seat = document.createElement("div");
+      seat.className = "seat";
+
+      if (i < inCar) {
+        const heroIdx = i % 10;
+        seat.innerHTML = `<span class="avatar-hero hero-${heroIdx}"></span>`;
+        if (i < state.initialCount) {
+          seat.classList.add("initial");
+        } else {
+          seat.classList.add(ans === state.correctAnswer ? "added-correct" : "added-wrong");
+        }
+      } else {
+        seat.classList.add("empty", "pulse");
+        seat.textContent = "❓";
+      }
+      seatGrid.appendChild(seat);
+    }
+
+    if (state.target === 10) {
+      document.getElementById("trailer-title").textContent = inTrailer > 0 ? `Прицеп: ${inTrailer}` : "Прицеп: 0";
+      const trailerSeats = document.getElementById("trailer-seats");
+      trailerSeats.innerHTML = "";
+      for (let j = 0; j < inTrailer; j++) {
+        const heroIdx = (inCar + j) % 10;
+        const item = document.createElement("div");
+        item.className = "trailer-item";
+        item.innerHTML = `<span class="avatar-hero hero-${heroIdx}"></span>`;
+        trailerSeats.appendChild(item);
+      }
+    }
+
+    document.querySelectorAll(".btn-candy").forEach(btn => btn.disabled = true);
+  }
+
+  function renderUI() {
+    const isStationTen = (state.target === 10);
+    const trailerCar = document.getElementById("trailer-car");
+    const coupler = document.getElementById("train-coupler");
+
+    if (isStationTen) {
+      trailerCar.classList.add("show");
+      coupler.classList.add("show");
+    } else {
+      trailerCar.classList.remove("show");
+      coupler.classList.remove("show");
+    }
+
+    document.getElementById("car-title").textContent = `Вагон: ${state.target} мест`;
+    document.getElementById("ten-badge").classList.remove("visible");
+
+    const board = document.getElementById("board-card");
+    board.className = "parchment-board";
+    document.getElementById("formula-text").innerHTML = `${state.initialCount} + ❓ = ${state.target}`;
+    document.getElementById("hint-text").textContent = "Сколько зверят посадить?";
+
+    const seatGrid = document.getElementById("seat-grid");
+    seatGrid.innerHTML = "";
+    applyGridLayout(seatGrid, state.target);
+
+    for (let i = 0; i < state.target; i++) {
+      const seat = document.createElement("div");
+      seat.className = "seat";
+      if (i < state.initialCount) {
+        const heroIdx = i % 10;
+        seat.innerHTML = `<span class="avatar-hero hero-${heroIdx}"></span>`;
+        seat.classList.add("initial");
+      } else {
+        seat.classList.add("empty");
+        seat.textContent = "❓";
+      }
+      seatGrid.appendChild(seat);
+    }
+
+    if (isStationTen) {
+      document.getElementById("trailer-title").textContent = "Прицеп: 0";
+      document.getElementById("trailer-seats").innerHTML = "";
+    }
+
+    const candidateGrid = document.getElementById("candidate-grid");
+    candidateGrid.innerHTML = "";
+
+    state.candidates.forEach((val, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "btn-candy";
+      btn.disabled = state.isLocked;
+
+      const heroSampleIdx = (state.initialCount + idx) % 10;
+
+      btn.innerHTML = `
+        <span>+${val}</span>
+        <div style="display: flex; gap: 2px;">
+          <span class="candy-mini-hero hero-${heroSampleIdx}"></span>
+        </div>
+      `;
+      btn.onclick = () => {
+        playFx("pop");
+        handlePick(val);
+      };
+      candidateGrid.appendChild(btn);
+    });
+  }
+
+  window.addEventListener("DOMContentLoaded", startRound);
+</script>
+
+</body>
+</html>
